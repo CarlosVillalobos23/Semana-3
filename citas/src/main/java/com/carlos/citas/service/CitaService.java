@@ -7,4 +7,7 @@ import com.carlos.commons.service.CrudService;
 
 public interface CitaService extends CrudService<CitaRequest, CitaResponse> {
     void actualizarEstadoCita(Long idCita,Long idEstadoCita);
+
+    boolean obtenerCitaActivaConMedicoId(Long idMedico);
+    boolean obtenerCitaActivaConPacienteId(Long idPaciente);
 }

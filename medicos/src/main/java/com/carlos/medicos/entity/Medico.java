@@ -35,10 +35,10 @@ public class Medico {
     @Column(name = "TELEFONO",length = 10,nullable = false)
     private String telefono;
     @Column(name = "CEDULA_PROFESIONAL",length = 12,nullable = false)
-    private String cedula;
+    private String cedulaProfesional;
     @Column(name = "ESPECIALIDAD",nullable = false,length = 30)
     @Enumerated(EnumType.STRING)
-    private EspecialidadMedico especialidad;
+    private EspecialidadMedico idEspecialidad;
     @Column(name = "DISPONIBILIDAD",length = 30,nullable = false)
     @Enumerated(EnumType.STRING)
     private DisponibilidadMedico disponibilidad;
@@ -55,7 +55,7 @@ public class Medico {
         this.edad = edad;
         this.email = email.trim().toLowerCase();
         this.telefono = telefono.trim();
-        this.cedula = cedula.trim();
+        this.cedulaProfesional = cedula.trim();
 
     }
 
@@ -65,7 +65,7 @@ public class Medico {
         StringCustomUtils.validarTamano(apellidoMaterno,2,50,"El apellido Materno es requerido y debe tener entre 2 y 50 caracteres");
         StringCustomUtils.validarTamano(email,10,100,"El email es requerido y debe tener entre 10 y 100 caracteres");
         StringCustomUtils.validarTamano(telefono,10,10,"El telefono es requerido y debe tener 10 caracteres");
-        StringCustomUtils.validarTamano(cedula,12,12,"La cedula es requerida y debe tener 12 caracteres");
+        StringCustomUtils.validarTamano(cedula.trim(),12,12,"La cedula es requerida y debe tener 12 caracteres");
         ValoresNumericosUtils.validarRangoShort(edad,(short)18,(short)100,"La edad es requerida y debe tener entre 18 y 100 años");
         if(especialidad==null)throw  new IllegalArgumentException("La especialidad es requerida");
     }
@@ -76,7 +76,7 @@ public class Medico {
     public void actualizarEspecialidad(EspecialidadMedico nuevaEspecialidad){
         validarNoEliminado();
         if(nuevaEspecialidad==null)throw new IllegalArgumentException("La nueva especialidad es requerida");
-        this.especialidad=nuevaEspecialidad;
+        this.idEspecialidad=nuevaEspecialidad;
     }
     public void eliminar(){
         validarNoEliminado();

@@ -20,11 +20,11 @@ public class MedicoMapper implements CommonMapper<MedicoRequest, MedicoResponse,
                 .nombre(request.nombre().trim())
                 .apellidoPaterno(request.apellidoPaterno().trim())
                 .apellidoMaterno(request.apellidoMaterno().trim())
-                .edad(request.edad().shortValue())
+                .edad(request.edad())
                 .email(request.email().trim().toLowerCase())
                 .telefono(request.telefono().trim())
-                .cedula(request.cedula() != null ? request.cedula().trim() : null)
-                .especialidad(convertirEspecialidad(request.especialidad()))
+                .cedulaProfesional(request.cedulaProfesional() != null ? request.cedulaProfesional().trim() : null)
+                .idEspecialidad(convertirEspecialidad(request.idEspecialidad()))
                 .disponibilidad(DisponibilidadMedico.DISPONIBLE) // estado inicial
                 .estadoRegistro(EstadoRegistro.ACTIVO)           // estado inicial
                 .build();
@@ -42,8 +42,8 @@ public class MedicoMapper implements CommonMapper<MedicoRequest, MedicoResponse,
                 entidad.getEdad(),
                 entidad.getEmail(),
                 entidad.getTelefono(),
-                entidad.getCedula(),
-                entidad.getEspecialidad() != null ? entidad.getEspecialidad().getDescripcion() : null,
+                entidad.getCedulaProfesional(),
+                entidad.getIdEspecialidad() != null ? entidad.getIdEspecialidad().getDescripcion() : null,
                 entidad.getDisponibilidad() != null ? entidad.getDisponibilidad().getDescripcion() : null,
                 entidad.getEstadoRegistro() != null ? entidad.getEstadoRegistro().name() : null
         );

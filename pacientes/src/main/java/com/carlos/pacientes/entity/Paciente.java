@@ -3,6 +3,9 @@ import com.carlos.commons.enums.EstadoRegistro;
 import com.carlos.commons.utils.StringCustomUtils;
 import com.carlos.commons.utils.ValoresNumericosUtils;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -48,7 +51,7 @@ public class Paciente {
     @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     private EstadoRegistro estadoRegistro;
 
-    private void validarDatos(String nombre,String apellidoPaterno,String apellidoMaterno,String email,String telefono,String direccion,Short edad,Double peso,Double estatura){
+    public void validarDatos(String nombre, String apellidoPaterno, String apellidoMaterno, String email, String telefono, String direccion, Short edad, Double peso, Double estatura){
         StringCustomUtils.validarTamano(nombre,1,50,
                 "El nombre es requerido y debe tener entre 1 y 50 caracteres");
         StringCustomUtils.validarTamano(apellidoPaterno,1,50,
@@ -67,7 +70,7 @@ public class Paciente {
 
     }
 
-    public void actualizar(String nombre, String apellidoPaterno, String apellidoMaterno, Short edad, Double peso, Double estatura,  String email, String telefono, String direccion) {
+    public void actualizar(String nombre, String apellidoPaterno, String apellidoMaterno, @NotBlank(message = "La edad es requerida") @Min(value = 18, message = "La edad minima es de 18 años") @Max(value = 100, message = "La edad maxima es de 100 años") Short edad, Double peso, Double estatura, String email, String telefono, String direccion) {
         validarNoEliminado();
         validarDatos(nombre,apellidoPaterno,apellidoMaterno,email,telefono,direccion,edad,peso,estatura);
         this.nombre = nombre.trim();
@@ -87,7 +90,7 @@ public class Paciente {
         if(this.estadoRegistro==EstadoRegistro.ELIMINADO)
             throw new IllegalArgumentException("El paciente esta eliminado");
     }
-    private void asignarImc(){
+    public void asignarImc(){
         validarNoEliminado();
         if(peso==null|| estatura==null||estatura<=0){
             this.imc=0.0;

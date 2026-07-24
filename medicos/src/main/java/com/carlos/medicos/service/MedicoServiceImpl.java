@@ -1,7 +1,9 @@
 package com.carlos.medicos.service;
 
+import com.carlos.commons.clients.CitaClient;
 import com.carlos.commons.dto.medicos.MedicoRequest;
 import com.carlos.commons.dto.medicos.MedicoResponse;
+import com.carlos.commons.enums.DisponibilidadMedico;
 import com.carlos.commons.enums.EstadoRegistro;
 import com.carlos.commons.exceptions.RecursoNoEncontradoException;
 import com.carlos.medicos.entity.Medico;
@@ -13,18 +15,20 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+
 @Service
 @AllArgsConstructor
 @Transactional
 @Slf4j
 public class MedicoServiceImpl implements MedicoService {
+
     private final MedicoRepository medicoRepository;
     private final MedicoMapper medicoMapper;
+    private final CitaClient citaClient;
 
     @Override
     @Transactional(readOnly = true)
     public List<MedicoResponse> listar() {
-        log.info("Listando todos los médicos");
         return medicoRepository.findByEstadoRegistro(EstadoRegistro.ACTIVO).stream()
                 .map(medicoMapper::entidadAResponse)
                 .toList();
@@ -41,16 +45,15 @@ public class MedicoServiceImpl implements MedicoService {
         validarDatosMedico(request);
         Medico medico = medicoMapper.requestAEntidad(request);
         medicoRepository.save(medico);
-        log.info("Nuevo médico {} registrado", medico.getNombre());
         return medicoMapper.entidadAResponse(medico);
     }
 
     @Override
     public MedicoResponse actualizar(MedicoRequest request, Long id) {
         Medico medico = obtenerMedicoOException(id);
+        validarMedicoActualizable(id);
         validarCambiosUnicos(request, id);
         validarDatosMedico(request);
-
         medico.actualizar(
                 request.nombre(),
                 request.apellidoPaterno(),
@@ -58,73 +61,85 @@ public class MedicoServiceImpl implements MedicoService {
                 request.edad().shortValue(),
                 request.email(),
                 request.telefono(),
-                request.cedula(),
-                medicoMapper.convertirEspecialidad(request.especialidad())
+                request.cedulaProfesional(),
+                medicoMapper.convertirEspecialidad(request.idEspecialidad())
         );
-
-        log.info("Médico con id {} actualizado", id);
         return medicoMapper.entidadAResponse(medico);
     }
 
     @Override
     public void eliminar(Long id) {
         Medico medico = obtenerMedicoOException(id);
+        validarMedicoEliminable(id);
         medico.eliminar();
         medicoRepository.save(medico);
-        log.info("Médico con id {} eliminado", id);
+    }
+
+    @Override
+    public MedicoResponse obtenerMedicoPorIdSinEstado(Long id) {
+        Medico medico = obtenerMedicoOException(id);
+        return medicoMapper.entidadAResponse(medico);
+    }
+
+
+    @Override
+    public void actualizarDisponibilidadMedico(Long idMedico, Long idDisponibilidad) {
+        Medico medico = medicoRepository.findByIdAndEstadoRegistro(idMedico, EstadoRegistro.ACTIVO)
+                .orElseThrow(() -> new RecursoNoEncontradoException("Médico activo no encontrado con id: " + idMedico));
+        DisponibilidadMedico nuevaDisponibilidad = DisponibilidadMedico.values()[idDisponibilidad.intValue()];
+        if (nuevaDisponibilidad == DisponibilidadMedico.DISPONIBLE && citaClient.obtenerCitaActivaConMedicoId(idMedico)) {
+            throw new IllegalArgumentException("No se puede poner DISPONIBLE al médico porque tiene citas activas");
+        }
+        medico.actualizarDisponibilidad(nuevaDisponibilidad);
+        medicoRepository.save(medico);
+    }
+
+    public void obtenerDisponibilidadMedicoPorId(Long id) {
+        if (!medicoRepository.existsByIdAndDisponibilidad(id, DisponibilidadMedico.DISPONIBLE)) {
+            throw new IllegalArgumentException("El médico no está disponible");
+        }
     }
 
     private Medico obtenerMedicoOException(Long id) {
-        log.info("Buscando médico con id: {}", id);
         return medicoRepository.findById(id).orElseThrow(
                 () -> new RecursoNoEncontradoException("Médico no encontrado con id: " + id)
         );
     }
 
     private void validarDatosUnicos(MedicoRequest request) {
-        if (medicoRepository.existsByEmailIgnoreCaseAndEstadoRegistro(request.email(), EstadoRegistro.ACTIVO)) {
+        if (medicoRepository.existsByEmailIgnoreCaseAndEstadoRegistro(request.email(), EstadoRegistro.ACTIVO))
             throw new IllegalArgumentException("Ya existe un médico con el email: " + request.email());
-        }
-        if (medicoRepository.existsByTelefonoAndEstadoRegistro(request.telefono(), EstadoRegistro.ACTIVO)) {
+        if (medicoRepository.existsByTelefonoAndEstadoRegistro(request.telefono(), EstadoRegistro.ACTIVO))
             throw new IllegalArgumentException("Ya existe un médico con el teléfono: " + request.telefono());
-        }
-        if (medicoRepository.existsByCedulaIgnoreCaseAndEstadoRegistro(request.cedula(), EstadoRegistro.ACTIVO)) {
-            throw new IllegalArgumentException("Ya existe un médico con la cédula: " + request.cedula());
-        }
+        if (medicoRepository.existsByCedulaProfesionalIgnoreCaseAndEstadoRegistro(request.cedulaProfesional(), EstadoRegistro.ACTIVO))
+            throw new IllegalArgumentException("Ya existe un médico con la cédula: " + request.cedulaProfesional());
     }
 
     private void validarCambiosUnicos(MedicoRequest request, Long id) {
-        if (medicoRepository.existsByEmailIgnoreCaseAndEstadoRegistroAndIdNot(request.email(), EstadoRegistro.ACTIVO, id)) {
+        if (medicoRepository.existsByEmailIgnoreCaseAndEstadoRegistroAndIdNot(request.email(), EstadoRegistro.ACTIVO, id))
             throw new IllegalArgumentException("Ya existe un médico con el email: " + request.email());
-        }
-        if (medicoRepository.existsByTelefonoAndEstadoRegistroAndIdNot(request.telefono(), EstadoRegistro.ACTIVO, id)) {
+        if (medicoRepository.existsByTelefonoAndEstadoRegistroAndIdNot(request.telefono(), EstadoRegistro.ACTIVO, id))
             throw new IllegalArgumentException("Ya existe un médico con el teléfono: " + request.telefono());
-        }
-        if (medicoRepository.existsByCedulaIgnoreCaseAndEstadoRegistroAndIdNot(request.cedula(), EstadoRegistro.ACTIVO, id)) {
-            throw new IllegalArgumentException("Ya existe un médico con la cédula: " + request.cedula());
-        }
+        if (medicoRepository.existsByCedulaProfesionalIgnoreCaseAndEstadoRegistroAndIdNot(request.cedulaProfesional(), EstadoRegistro.ACTIVO, id))
+            throw new IllegalArgumentException("Ya existe un médico con la cédula: " + request.cedulaProfesional());
     }
 
     private void validarDatosMedico(MedicoRequest request) {
-        if (request.edad() < 18) {
+        if (request.edad() < 18)
             throw new IllegalArgumentException("La edad mínima es 18 años");
-        }
-        if (request.cedula() == null || request.cedula().length() != 12) {
+        if (request.cedulaProfesional() == null || request.cedulaProfesional().length() != 12)
             throw new IllegalArgumentException("La cédula profesional debe tener exactamente 12 caracteres");
-        }
-        if (request.especialidad() == null) {
+        if (request.idEspecialidad() == null)
             throw new IllegalArgumentException("La especialidad es requerida");
-        }
     }
 
-    @Override
-    public MedicoResponse obtenerMedicoPorIdSinEstado(Long id) {
-        Medico medico=obtenerMedicoOException(id);
-        return medicoMapper.entidadAResponse(medico);
+    private void validarMedicoEliminable(Long id) {
+        if (citaClient.obtenerCitaActivaConMedicoId(id))
+            throw new IllegalArgumentException("No se puede eliminar el médico porque tiene citas activas");
     }
 
-    @Override
-    public void actualizarDisponibilidadMdico(Long idMedico, Long idDisponibilidad) {
-
+    private void validarMedicoActualizable(Long id) {
+        if (citaClient.obtenerCitaActivaConMedicoId(id))
+            throw new IllegalArgumentException("No se puede actualizar el médico porque tiene citas activas");
     }
 }

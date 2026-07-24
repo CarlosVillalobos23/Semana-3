@@ -1,5 +1,6 @@
 package com.carlos.medicos.repository;
 
+import com.carlos.commons.enums.DisponibilidadMedico;
 import com.carlos.commons.enums.EstadoRegistro;
 import com.carlos.medicos.entity.Medico;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -16,13 +17,17 @@ public interface MedicoRepository extends JpaRepository <Medico,Long>{
 
     boolean existsByEmailIgnoreCaseAndEstadoRegistro(String email, EstadoRegistro estadoRegistro);
     boolean existsByTelefonoAndEstadoRegistro(String telefono,EstadoRegistro estadoRegistro);
-    boolean existsByCedulaIgnoreCaseAndEstadoRegistro(String cedula,EstadoRegistro estadoRegistro);
+    boolean existsByCedulaProfesionalIgnoreCaseAndEstadoRegistro(String cedula,EstadoRegistro estadoRegistro);
     boolean existsByEmailIgnoreCaseAndEstadoRegistroAndIdNot(
             String email,
             EstadoRegistro estadoRegistro,
             Long id
     );
     boolean existsByTelefonoAndEstadoRegistroAndIdNot(String telefono,EstadoRegistro estadoRegistro,Long id);
-    boolean existsByCedulaIgnoreCaseAndEstadoRegistroAndIdNot(String cedula,EstadoRegistro estadoRegistro,Long is);
-
+    boolean existsByCedulaProfesionalIgnoreCaseAndEstadoRegistroAndIdNot(
+            String cedulaProfesional,
+            EstadoRegistro estadoRegistro,
+            Long id
+    );
+    boolean existsByIdAndDisponibilidad(Long id, DisponibilidadMedico disponibilidadMedico);
 }
