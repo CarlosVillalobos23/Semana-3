@@ -24,7 +24,7 @@ spring:
               filters:
                 - StripPrefix=2
 
-            - id: msv-citas
+            - id: citas
               uri: lb://citas
               predicates:
                 - Path=/api/citas/**

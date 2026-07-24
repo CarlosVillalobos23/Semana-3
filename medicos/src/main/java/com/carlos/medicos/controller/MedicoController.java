@@ -18,16 +18,30 @@ public class MedicoController extends CommonController<MedicoRequest, MedicoResp
     protected MedicoController(MedicoService service) {
         super(service);
     }
+
+    @GetMapping("/activo/{id}")
+    public ResponseEntity<MedicoResponse> obtenerMedicoActivoPorId(
+            @PathVariable @Positive(message = "El id debe ser positivo") Long id) {
+        return ResponseEntity.ok(service.obtenerPorId(id));
+    }
+
     @GetMapping("/id-medico/{id}")
     public ResponseEntity<MedicoResponse> obtenerMedicoPorIdSinEstado(
-            @PathVariable@Positive(message = "El id debe ser positivo")Long id){
-                return ResponseEntity.ok(service.obtenerMedicoPorIdSinEstado(id));}
-    @PutMapping("/{idMedico}/disponibilidad/{idDisponibilidad}")
-    public  ResponseEntity<Void>actualizarDisponibilidadMedico(
-            @PathVariable@Positive(message = "El id debe ser positivo")Long id,
-            @PathVariable@Positive(message = "El idDisponibilidad debe ser positivo")Long idDisponibilidad
-    ){
-        service.actualizarDisponibilidadMdico(id,idDisponibilidad);
-        return  ResponseEntity.noContent().build();
+            @PathVariable @Positive(message = "El id debe ser positivo") Long id) {
+        return ResponseEntity.ok(service.obtenerMedicoPorIdSinEstado(id));
     }
+
+    @PutMapping("/{idMedico}/disponibilidad/{idDisponibilidad}")
+    public ResponseEntity<Void> actualizarDisponibilidadMedico(
+            @PathVariable @Positive(message = "El id debe ser positivo") Long id,
+            @PathVariable @Positive(message = "El idDisponibilidad debe ser positivo") Long idDisponibilidad) {
+        service.actualizarDisponibilidadMedico(id, idDisponibilidad);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/medico-disponible/{id}")
+    public void obtenerDisponibilidadMedicoPorId(@PathVariable Long id) {
+        service.obtenerDisponibilidadMedicoPorId(id);
+    }
+
 }

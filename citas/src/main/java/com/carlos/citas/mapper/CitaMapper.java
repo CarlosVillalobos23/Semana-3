@@ -15,8 +15,8 @@ public class CitaMapper implements CommonMapper<CitaRequest, CitaResponse, Cita>
 
     @Override
     public Cita requestAEntidad(CitaRequest request) {
-        if(request==null)return null;
-        return  Cita.crear(
+        if (request == null) return null;
+        return Cita.crear(
                 request.idPaciente(),
                 request.idMedico(),
                 request.fechaCita(),
@@ -26,7 +26,7 @@ public class CitaMapper implements CommonMapper<CitaRequest, CitaResponse, Cita>
 
     @Override
     public CitaResponse entidadAResponse(Cita entidad) {
-        if(entidad==null)return null;
+        if (entidad == null) return null;
         return new CitaResponse(
                 entidad.getId(),
                 null,
@@ -38,7 +38,7 @@ public class CitaMapper implements CommonMapper<CitaRequest, CitaResponse, Cita>
     }
 
     public CitaResponse entidadAResponse(Cita entidad, PacienteResponse paciente, MedicoResponse medico) {
-        if(entidad==null)return null;
+        if (entidad == null) return null;
         return new CitaResponse(
                 entidad.getId(),
                 pacienteResponseADatosPaciente(paciente),
@@ -48,33 +48,37 @@ public class CitaMapper implements CommonMapper<CitaRequest, CitaResponse, Cita>
                 entidad.getEstadoCita().getDescripcion()
         );
     }
-    private DatosMedico medicoResponseADatosMedico(MedicoResponse medico){
-        if(medico==null)return null;
+
+    private DatosMedico medicoResponseADatosMedico(MedicoResponse medico) {
+        if (medico == null) return null;
         return new DatosMedico(
                 medico.nombre(),
                 medico.cedula(),
                 medico.especialidad()
         );
     }
-    private DatosPaciente pacienteResponseADatosPaciente(PacienteResponse paciente){
-        if(paciente==null)return null;
+
+    private DatosPaciente pacienteResponseADatosPaciente(PacienteResponse paciente) {
+        if (paciente == null) return null;
         return new DatosPaciente(
                 paciente.nombre(),
                 paciente.numExpediente(),
-                paciente.edad()+" años",
-                paciente.peso()+" Kg",
-                paciente.estatura()+"m.",
+                paciente.edad() + " años",
+                paciente.peso() + " Kg",
+                paciente.estatura() + " m.",
                 String.join("",
-                        Math.round(paciente.imc()*100.0)/100.0+"",clasificacionIMC(paciente.imc())),
+                        Math.round(paciente.imc() * 100.0) / 100.0 + "",
+                        clasificacionIMC(paciente.imc())),
                 paciente.telefono()
         );
     }
-    private String clasificacionIMC(Double imc){
-        if(imc<18.5)return "Bajo peso";
-        if(imc<25)return "peso normal peso";
-        if(imc<30)return "sobrepeso";
-        if(imc<35)return "obesidad grado I";
-        if(imc<40)return "obesidad grado II";
-        return "obesia grado III";
+
+    private String clasificacionIMC(Double imc) {
+        if (imc < 18.5) return "Bajo peso";
+        if (imc < 25) return "Peso normal";
+        if (imc < 30) return "Sobrepeso";
+        if (imc < 35) return "Obesidad grado I";
+        if (imc < 40) return "Obesidad grado II";
+        return "Obesidad grado III";
     }
 }

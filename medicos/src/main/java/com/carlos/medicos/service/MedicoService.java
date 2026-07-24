@@ -6,5 +6,8 @@ import com.carlos.commons.service.CrudService;
 
 public interface MedicoService  extends CrudService<MedicoRequest, MedicoResponse> {
     MedicoResponse obtenerMedicoPorIdSinEstado(Long id);
-    void actualizarDisponibilidadMdico(Long idMedico,Long idDisponibilidad);
+    void actualizarDisponibilidadMedico(Long idMedico, Long idDisponibilidad);
+
+    void obtenerDisponibilidadMedicoPorId(Long id);
+
 }

@@ -9,13 +9,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @Validated
-public class PacientrController extends CommonController<PacienteRequest, PacienteResponse, PacienteService> {
+public class PacienteController extends CommonController<PacienteRequest, PacienteResponse, PacienteService> {
 
-    protected PacientrController(PacienteService service) {
+    protected PacienteController(PacienteService service) {
         super(service);
     }
     @GetMapping("/id-paciente/{id}")
